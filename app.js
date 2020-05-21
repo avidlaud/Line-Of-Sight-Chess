@@ -342,6 +342,10 @@ class Rook extends Piece {
         let e = true;
         let s = true;
         let w = true;
+        let ne = true;
+        let nw = true;
+        let se = true;
+        let sw = true;
         
         for(let i = 1; i <= 8; i++) {
             if(n) {
