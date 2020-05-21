@@ -131,6 +131,14 @@ class Board {
         return this.board[this.getPos(file, rank)];
     }
 
+    /**
+     * Get the piece at an index
+     * @param {Number} pos board array index
+     */
+    getPieceFromPos(pos) {
+        return this.board[pos];
+    }
+
 
     /**
      * Calculate the new position of a piece given a move from the perspective of a player
@@ -142,7 +150,7 @@ class Board {
      * @returns the new position
      */
     calcPos(startFile, startRank, fileMove, rankMove, color) {
-        return (color) ? this.getPos(startFile + fileMove, startRank + rankMove):this.getPos(startFile - fileMove, startRank - Rankmove);
+        return (color) ? this.getPos(startFile + fileMove, startRank + rankMove):this.getPos(startFile - fileMove, startRank - rankMove);
     }
 
     /**
@@ -162,7 +170,11 @@ class Board {
             let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
             //"images/white-pawn.png"
             board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}"><div id="square_${i}" class="square-content">${image}</div></div>`;
-            console.log(this.getRank(i));
+            if(e != null) {
+                e.getMoves(this);
+                console.log(e.moves);
+            }
+            //console.log(this.getRank(i));
         });
     }
 
@@ -198,6 +210,32 @@ class Pawn extends Piece{
 
     constructor(file, rank, color) {
         super(file, rank, color);
+    }
+
+    getMoves(board) {
+        //Clear past moves
+        this.moves= [];
+        let oneAhead = board.calcPos(this.file, this.rank, 0, 1, this.color);
+        //First move - can move up twice
+        if(!this.hasMoved) {
+            let twoAhead = board.calcPos(this.file, this.rank, 0, 2, this.color);
+            if(board.getPieceFromPos(twoAhead) == null && board.getPieceFromPos(oneAhead) == null) {
+                this.moves.push(twoAhead);
+            }
+        }
+        //Move up once
+        if(board.getPieceFromPos(oneAhead) == null) {
+            this.moves.push(oneAhead);
+        }
+        //Attacks
+        let leftAttack = board.calcPos(this.file, this.rank, -1, 1, this.color);
+        if(board.getPieceFromPos(leftAttack) != null && board.getPieceFromPos(leftAttack).color != this.color) {
+            this.moves.push(leftAttack);
+        }
+        let rightAttack = board.calcPos(this.file, this.rank, 1, 1, this.color);
+        if(board.getPieceFromPos(rightAttack) != null && board.getPieceFromPos(rightAttack).color != this.color) {
+            this.moves.push(rightAttack);
+        }
     }
 
     toString() {return "Pawn";}
