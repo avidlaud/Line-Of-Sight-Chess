@@ -20,6 +20,11 @@ const Players = {
     Black: false
 }
 
+/**
+ * Find the position that an index represents
+ * @param {Number}  index Index in array representation of board
+ * @returns board position
+ */
 function getPosFromIndex(index) {
     return Object.keys(Positions).find(key => Positions[key] === index);
 }
@@ -79,15 +84,57 @@ class Board {
         this.board.push(new Rook(Files.H, 8, Players.White));
     }
 
+    /**
+     * Get the piece at the specified position
+     * @param {Number} file 
+     * @param {Number} rank 
+     * @returns piece at position
+     */
+    getPiece(file, rank) {
+        return this.board[((8-rank)*8) + (file-1)];
+    }
+
+    /**
+     * Get the file and rank of a position
+     * @param {Number} pos board array index
+     */
+    getFileRank(pos) {
+        return {
+            file: this.getFile(pos),
+            rank: this.getRank(pos)
+        }
+    }
+
+    /**
+     * Get the file of a position
+     * @param {Number} pos board array index
+     * @returns file
+     */
+    getFile(pos) {
+        return (pos % 8) + 1;
+    }
+
+    /**
+     * Get the rank of a position
+     * @param {Number} pos board array index
+     */
+    getRank(pos) {
+        return 8-Math.floor(pos/8);
+    }
+
+
+
     drawBoard() {
         this.board.forEach((e, i) => {
             let image = (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>";
             let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
             //"images/white-pawn.png"
             board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}"><div id="square_${i}" class="square-content">${image}</div></div>`;
-            console.log(getPosFromIndex(i));
+            console.log(this.getRank(i));
         });
     }
+
+    
 
     get() {
         return this.board;
