@@ -404,6 +404,65 @@ class Rook extends Piece {
                     }
                 }
             }
+            if(ne) {
+                if(board.legalPosition(this.file + i, this.rank + i)) {
+                    let pne = board.getPos(this.file + i, this.rank + i);
+                    if(board.getPieceFromPos(pne) == null) {
+                        this.moves.push(pne);
+                    }
+                    else if(board.getPieceFromPos(pne).color != this.color) {
+                        this.moves.push(pne);
+                    }
+                    //Ally piece blocking
+                    else {
+                        ne = false;
+                    }
+                }
+            }
+            if(nw) {
+                if(board.legalPosition(this.file - i, this.rank + i)) {
+                    let pnw = board.getPos(this.file - i, this.rank + i);
+                    if(board.getPieceFromPos(pnw) == null) {
+                    }
+                    else if(board.getPieceFromPos(pnw).color != this.color) {
+                    }
+                    //Ally piece blocking
+                    else {
+                        nw = false;
+                    }
+                }
+            }
+            if(se) {
+                if(board.legalPosition(this.file + i, this.rank - i)) {
+                    let pse = board.getPos(this.file + i, this.rank - i);
+                    if(board.getPieceFromPos(pse) == null) {
+                        this.moves.push(pse);
+                        console.log((this.file + i) + "," + (this.rank-i))
+                    }
+                    else if(board.getPieceFromPos(pse).color != this.color) {
+                        this.moves.push(pse);
+                    }
+                    //Ally piece blocking
+                    else {
+                        se = false;
+                    }
+                }
+            }
+            if(sw) {
+                if(board.legalPosition(this.file - i, this.rank - i)) {
+                    let psw = board.getPos(this.file - i, this.rank - i);
+                    if(board.getPieceFromPos(psw) == null) {
+                        this.moves.push(psw);
+                    }
+                    else if(board.getPieceFromPos(psw).color != this.color) {
+                        this.moves.push(psw);
+                    }
+                    //Ally piece blocking
+                    else {
+                        sw = false;
+                    }
+                }
+            }
         }
     }
 
@@ -414,6 +473,81 @@ class Queen extends Piece {
 
     constructor(file, rank, color) {
         super(file, rank, color);
+    }
+
+    getMoves(board) {
+        this.moves = [];
+        let n = true;
+        let e = true;
+        let s = true;
+        let w = true;
+        let ne = true;
+        let nw = true;
+        let se = true;
+        let sw = true;
+
+        for(let i = 1; i <= 8; i++) {
+            if(n) {
+                if(board.legalPosition(this.file, this.rank + i)) {
+                    let pn = board.getPos(this.file, this.rank + i);
+                    if(board.getPieceFromPos(pn) == null) {
+                        this.moves.push(pn);
+                    }
+                    else if(board.getPieceFromPos(pn).color != this.color) {
+                        this.moves.push(pn);
+                    }
+                    //Ally piece blocking
+                    else {
+                        n = false;
+                    }
+                }
+            }
+            if(e) {
+                if(board.legalPosition(this.file + i, this.rank)) {
+                    let pe = board.getPos(this.file + i, this.rank);
+                    if(board.getPieceFromPos(pe) == null) {
+                        this.moves.push(pe);
+                    }
+                    else if(board.getPieceFromPos(pe).color != this.color) {
+                        this.moves.push(pe);
+                    }
+                    //Ally piece blocking
+                    else {
+                        e = false;
+                    }
+                }
+            }
+            if(s) {
+                if(board.legalPosition(this.file, this.rank - i)) {
+                    let ps = board.getPos(this.file, this.rank - i);
+                    if(board.getPieceFromPos(ps) == null) {
+                        this.moves.push(ps);
+                    }
+                    else if(board.getPieceFromPos(ps).color != this.color) {
+                        this.moves.push(ps);
+                    }
+                    //Ally piece blocking
+                    else {
+                        s = false;
+                    }
+                }
+            }
+            if(w) {
+                if(board.legalPosition(this.file - i, this.rank)) {
+                    let pw = board.getPos(this.file - i, this.rank);
+                    if(board.getPieceFromPos(pw) == null) {
+                        this.moves.push(pw);
+                    }
+                    else if(board.getPieceFromPos(pw).color != this.color) {
+                        this.moves.push(pw);
+                    }
+                    //Ally piece blocking
+                    else {
+                        w = false;
+                    }
+                }
+            }
+        }
     }
 
     toString() {return "Queen"}
