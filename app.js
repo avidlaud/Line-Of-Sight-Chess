@@ -4,17 +4,6 @@ const Files = {
     A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8
 }
 
-const Ranks = {
-    8:8,
-    7:7,
-    6:6,
-    5:5,
-    4:4,
-    3:3,
-    2:2,
-    1:1
-}
-
 const Positions = {
     A8:0,   B8:1,   C8:2,   D8:3,   E8:4,   F8:5,   G8:6,   H8:7,
     A7:8,   B7:9,   C7:10,  D7:11,  E7:12,  F7:13,  G7:14,  H7:15,
@@ -24,6 +13,11 @@ const Positions = {
     A3:40,  B3:41,  C3:42,  D3:43,  E3:44,  F3:45,  G3:46,  H3:47,
     A2:48,  B2:49,  C2:50,  D2:51,  E2:52,  F2:53,  G2:54,  H2:55,
     A1:56,  B1:57,  C1:58,  D1:59,  E1:60,  F1:61,  G1:62,  H1:63
+}
+
+const Players = {
+    White: true,
+    Black: false
 }
 
 function getPosFromIndex(index) {
@@ -53,17 +47,44 @@ class Board {
 
     setNewBoard() {
         this.board = [];
+        /*
         for(let i = 0; i < 64; i++) {
             this.board.push(new Pawn(i, i, true));
         }
+        */
+        this.board.push(new Rook(Files.A, 8, Players.Black));
+        this.board.push(new Knight(Files.B, 8, Players.Black));
+        this.board.push(new Bishop(Files.C, 8, Players.Black));
+        this.board.push(new Queen(Files.D, 8, Players.Black));
+        this.board.push(new King(Files.E, 8, Players.Black));
+        this.board.push(new Bishop(Files.F, 8, Players.Black));
+        this.board.push(new Knight(Files.G, 8, Players.Black));
+        this.board.push(new Rook(Files.H, 8, Players.Black));
+        for(let i = 1; i <= 8; i++) {
+            this.board.push(new Pawn(i, 7, Players.Black));
+        }
+        for(let i = 0; i < 32; i++) {
+            this.board.push(null);
+        }
+        for(let i = 1; i <= 8; i++) {
+            this.board.push(new Pawn(i, 2, Players.White));
+        }
+        this.board.push(new Rook(Files.A, 8, Players.White));
+        this.board.push(new Knight(Files.B, 8, Players.White));
+        this.board.push(new Bishop(Files.C, 8, Players.White));
+        this.board.push(new Queen(Files.D, 8, Players.White));
+        this.board.push(new King(Files.E, 8, Players.White));
+        this.board.push(new Bishop(Files.F, 8, Players.White));
+        this.board.push(new Knight(Files.G, 8, Players.White));
+        this.board.push(new Rook(Files.H, 8, Players.White));
     }
 
     drawBoard() {
         this.board.forEach((e, i) => {
-            let color = e.color ? "white":"black";
-            let type = "images/" + color + "-" + e.constructor.name.toLowerCase() + ".png";
+            let image = (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>";
+            let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
             //"images/white-pawn.png"
-            board_container.innerHTML += `<div id="block_${i}" class="square square-color-${(i+Math.floor(i/8))%2}"><div id="square_${i}" class="square-content"><img src=${type}></div></div>`;
+            board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}"><div id="square_${i}" class="square-content">${image}</div></div>`;
             console.log(getPosFromIndex(i));
         });
     }
@@ -148,15 +169,6 @@ class King extends Piece {
     }
 
     toString() {return "King"}
-}
-
-class EmptySquare extends Piece {
-
-    constructor(file, rank, color) {
-        super(file, rank, color);
-    }
-
-    toString() {return "Empty"}
 }
 
 game = new LOSChess();

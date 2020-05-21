@@ -48,12 +48,12 @@ h2 {
     top: 0;
 }
 
-.square-color-1 {
-    background: #B7D1E2;
+.light-square {
+    background: #D3A279;
 }
 
-.square-color-1 {
-    background: #1C2337;
+.dark-square {
+    background: #75513B;
 }
 
 .white-pawn {
