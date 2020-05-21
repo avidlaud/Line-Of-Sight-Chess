@@ -6,12 +6,8 @@
 }
 
 .container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     background:#ddd;
+    justify-content: center;
 }
 
 h1 {
@@ -26,20 +22,33 @@ h2 {
 }
 
 .board {
-    display: grid;
-    width: 800px;
-    height: 800px;
-    grid-template-columns: auto auto auto;
+    margin: auto;
+    width: 80vw;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .square {
-    display: flex;
-    width: 100px;
-    height: 100px;
-    align-items: center;
-    justify-content: center;
-    border: 5px solid black;
+    flex-basis: 12.5%;
+    border: 2px solid black;
+    overflow: hidden;
+    position: relative;
 }
+
+.square:after {
+    content: '';
+    display: block;
+    padding-bottom: 100%;
+}
+
+.square-content {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+
 
 .dark {
     background: #1C2337;
