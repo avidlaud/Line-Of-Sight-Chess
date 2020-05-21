@@ -85,13 +85,12 @@ class Board {
     }
 
     /**
-     * Get the piece at the specified position
+     * Get the array index of a position
      * @param {Number} file 
      * @param {Number} rank 
-     * @returns piece at position
      */
-    getPiece(file, rank) {
-        return this.board[((8-rank)*8) + (file-1)];
+    getPos(file, rank) {
+        return ((8-rank)*8) + (file-1);
     }
 
     /**
@@ -122,6 +121,39 @@ class Board {
         return 8-Math.floor(pos/8);
     }
 
+    /**
+     * Get the piece at the specified position
+     * @param {Number} file 
+     * @param {Number} rank 
+     * @returns piece at position
+     */
+    getPiece(file, rank) {
+        return this.board[this.getPos(file, rank)];
+    }
+
+
+    /**
+     * Calculate the new position of a piece given a move from the perspective of a player
+     * @param {Number} startFile    starting file
+     * @param {Number} startRank    starting rank
+     * @param {Number} fileMove     number of files to move: + is right, - is left
+     * @param {Number} rankMove     number of ranks to move: + is up, - is down
+     * @param {Number} color        the player
+     * @returns the new position
+     */
+    calcPos(startFile, startRank, fileMove, rankMove, color) {
+        return (color) ? this.getPos(startFile + fileMove, startRank + rankMove):this.getPos(startFile - fileMove, startRank - Rankmove);
+    }
+
+    /**
+     * Checks if a position is on the board
+     * @param {Number} file 
+     * @param {Number} rank 
+     * @returns true is legal, false otherwise
+     */
+    legalPosition(file, rank) {
+        return (file >= 1 && file <= 8 && rank >= 1 && file <= 8);
+    }
 
 
     drawBoard() {
@@ -133,8 +165,6 @@ class Board {
             console.log(this.getRank(i));
         });
     }
-
-    
 
     get() {
         return this.board;
