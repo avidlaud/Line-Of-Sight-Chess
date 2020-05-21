@@ -74,14 +74,14 @@ class Board {
         for(let i = 1; i <= 8; i++) {
             this.board.push(new Pawn(i, 2, Players.White));
         }
-        this.board.push(new Rook(Files.A, 8, Players.White));
-        this.board.push(new Knight(Files.B, 8, Players.White));
-        this.board.push(new Bishop(Files.C, 8, Players.White));
-        this.board.push(new Queen(Files.D, 8, Players.White));
-        this.board.push(new King(Files.E, 8, Players.White));
-        this.board.push(new Bishop(Files.F, 8, Players.White));
-        this.board.push(new Knight(Files.G, 8, Players.White));
-        this.board.push(new Rook(Files.H, 8, Players.White));
+        this.board.push(new Rook(Files.A, 1, Players.White));
+        this.board.push(new Knight(Files.B, 1, Players.White));
+        this.board.push(new Bishop(Files.C, 1, Players.White));
+        this.board.push(new Queen(Files.D, 1, Players.White));
+        this.board.push(new King(Files.E, 1, Players.White));
+        this.board.push(new Bishop(Files.F, 1, Players.White));
+        this.board.push(new Knight(Files.G, 1, Players.White));
+        this.board.push(new Rook(Files.H, 1, Players.White));
     }
 
     /**
@@ -160,7 +160,7 @@ class Board {
      * @returns true is legal, false otherwise
      */
     legalPosition(file, rank) {
-        return (file >= 1 && file <= 8 && rank >= 1 && file <= 8);
+        return ((file >= 1) && (file <= 8) && (rank >= 1) && (rank <= 8));
     }
 
 
@@ -254,6 +254,77 @@ class Bishop extends Piece {
 
     constructor(file, rank, color) {
         super(file, rank, color);
+    }
+
+    getMoves(board) {
+        //Clear past moves
+        this.moves = [];
+        let ne = true;
+        let nw = true;
+        let se = true;
+        let sw = true;
+
+        for(let i = 1; i <= 9; i++) {
+            if(ne) {
+                if(board.legalPosition(this.file + i, this.rank + i)) {
+                    let pne = board.getPos(this.file + i, this.rank + i);
+                    if(board.getPieceFromPos(pne) == null) {
+                        this.moves.push(pne);
+                    }
+                    else if(board.getPieceFromPos(pne).color != this.color) {
+                        this.moves.push(pne);
+                    }
+                    //Ally piece blocking
+                    else {
+                        ne = false;
+                    }
+                }
+            }
+            if(nw) {
+                if(board.legalPosition(this.file - i, this.rank + i)) {
+                    let pnw = board.getPos(this.file - i, this.rank + i);
+                    if(board.getPieceFromPos(pnw) == null) {
+                    }
+                    else if(board.getPieceFromPos(pnw).color != this.color) {
+                    }
+                    //Ally piece blocking
+                    else {
+                        nw = false;
+                    }
+                }
+            }
+            if(se) {
+                if(board.legalPosition(this.file + i, this.rank - i)) {
+                    let pse = board.getPos(this.file + i, this.rank - i);
+                    if(board.getPieceFromPos(pse) == null) {
+                        this.moves.push(pse);
+                        console.log((this.file + i) + "," + (this.rank-i))
+                    }
+                    else if(board.getPieceFromPos(pse).color != this.color) {
+                        this.moves.push(pse);
+                    }
+                    //Ally piece blocking
+                    else {
+                        se = false;
+                    }
+                }
+            }
+            if(sw) {
+                if(board.legalPosition(this.file - i, this.rank - i)) {
+                    let psw = board.getPos(this.file - i, this.rank - i);
+                    if(board.getPieceFromPos(psw) == null) {
+                        this.moves.push(psw);
+                    }
+                    else if(board.getPieceFromPos(psw).color != this.color) {
+                        this.moves.push(psw);
+                    }
+                    //Ally piece blocking
+                    else {
+                        sw = false;
+                    }
+                }
+            }
+        }
     }
 
     toString() {return "Bishop"}
