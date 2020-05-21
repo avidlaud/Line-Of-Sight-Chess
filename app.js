@@ -248,6 +248,23 @@ class Knight extends Piece {
         super(file, rank, color);
     }
 
+    knightMoves = [[1,2], [1,-2], [2,1], [2,-1], [-1,2], [-1,-2], [-2,1], [-2,-1]];
+
+    getMoves(board) {
+        this.board = [];
+        this.knightMoves.forEach(e => {
+            if(board.legalPosition(this.file + e[0], this.rank + e[1])) {
+                let targetPiece = board.getPos(this.file + e[0], this.rank + e[1]);
+                if(board.getPieceFromPos(targetPiece) == null) {
+                    this.moves.push(targetPiece);
+                }
+                else if(board.getPieceFromPos(targetPiece).color != this.color) {
+                    this.moves.push(targetPiece);
+                }
+            }
+        } );
+    }
+
     toString() { return "Knight"}
 }
 
