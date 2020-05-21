@@ -1,12 +1,12 @@
+let board_container = document.querySelector(".board");
 
+class LOSChess {
 
-function LOSChess() {
-    this.board_container = document.querySelector(".board");
-    this.board = []
-}
-
-LOSChess.createNewBoard = function() {
-
+    constructor() {
+        this.gameboard = new Board();
+        this.gameboard.setNewBoard();
+        this.gameboard.drawBoard();
+    }
 }
 
 /**
@@ -24,17 +24,16 @@ class Board {
         for(let i = 0; i < 64; i++) {
             this.board.push(new Pawn(i, i, true));
         }
-        /*
-        for(let i = 0; i < 64; i++) {
-            this.board.push(i);
-        }
-        */
     }
 
     drawBoard() {
         this.board.forEach((e, i) => {
-            game.board_container.innerHTML += `<div id="block_${i}" class="square"><div id="square_${i}" class="square-content">${this.board[i]}</div></div>`
-        })
+            let color = e.color ? "white":"black";
+            let type = "images/" + color + "-" + e.constructor.name.toLowerCase() + ".png";
+            //"images/white-pawn.png"
+            board_container.innerHTML += `<div id="block_${i}" class="square square-color-${(i+Math.floor(i/8))%2}"><div id="square_${i}" class="square-content"><img src=${type}></div></div>`;
+            console.log(type);
+        });
     }
 
     get() {
@@ -71,12 +70,52 @@ class Pawn extends Piece{
         super(rank, file, color);
     }
 
-    toString() {
-        return "Pawn";
+    toString() {return "Pawn";}
+}
+
+class Knight extends Piece {
+
+    constructor(rank, file, color) {
+        super(rank, file, color);
     }
+
+    toString() { return "Knight"}
+}
+
+class Bishop extends Piece {
+
+    constructor(rank, file, color) {
+        super(rank, file, color);
+    }
+
+    toString() {return "Bishop"}
+}
+
+class Rook extends Piece {
+    
+    constructor(rank, file, color) {
+        super(rank, file, color);
+    }
+
+    toString() {return "Rook"}
+}
+
+class Queen extends Piece {
+
+    constructor(rank, file, color) {
+        super(rank, file, color);
+    }
+
+    toString() {return "Queen"}
+}
+
+class King extends Piece {
+
+    constructor(rank, file, color) {
+        super(rank, file, color);
+    }
+
+    toString() {return "King"}
 }
 
 game = new LOSChess();
-gameboard = new Board();
-gameboard.setNewBoard();
-gameboard.drawBoard();

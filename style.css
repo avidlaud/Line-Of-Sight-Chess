@@ -27,11 +27,11 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    border: 5px solid black;
 }
 
 .square {
     flex-basis: 12.5%;
-    border: 2px solid black;
     overflow: hidden;
     position: relative;
 }
@@ -48,12 +48,15 @@ h2 {
     top: 0;
 }
 
+.square-color-1 {
+    background: #B7D1E2;
+}
 
-
-.dark {
+.square-color-1 {
     background: #1C2337;
 }
 
-.light {
-    background: #B7D1E2;
+.white-pawn {
+    background-image: url("images/white-pawn.png");
 }
+
