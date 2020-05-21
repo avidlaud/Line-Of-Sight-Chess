@@ -172,6 +172,7 @@ class Board {
             board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}"><div id="square_${i}" class="square-content">${image}</div></div>`;
             if(e != null) {
                 e.getMoves(this);
+                console.log(e.constructor.name);
                 console.log(e.moves);
             }
             //console.log(this.getRank(i));
@@ -273,6 +274,7 @@ class Bishop extends Piece {
                     }
                     else if(board.getPieceFromPos(pne).color != this.color) {
                         this.moves.push(pne);
+                        ne = false;
                     }
                     //Ally piece blocking
                     else {
@@ -284,8 +286,11 @@ class Bishop extends Piece {
                 if(board.legalPosition(this.file - i, this.rank + i)) {
                     let pnw = board.getPos(this.file - i, this.rank + i);
                     if(board.getPieceFromPos(pnw) == null) {
+                        this.moves.push(pnw);
                     }
                     else if(board.getPieceFromPos(pnw).color != this.color) {
+                        this.moves.push(pnw);
+                        nw = false;
                     }
                     //Ally piece blocking
                     else {
@@ -302,6 +307,7 @@ class Bishop extends Piece {
                     }
                     else if(board.getPieceFromPos(pse).color != this.color) {
                         this.moves.push(pse);
+                        se = false;
                     }
                     //Ally piece blocking
                     else {
@@ -317,6 +323,7 @@ class Bishop extends Piece {
                     }
                     else if(board.getPieceFromPos(psw).color != this.color) {
                         this.moves.push(psw);
+                        sw = false;
                     }
                     //Ally piece blocking
                     else {
@@ -342,10 +349,6 @@ class Rook extends Piece {
         let e = true;
         let s = true;
         let w = true;
-        let ne = true;
-        let nw = true;
-        let se = true;
-        let sw = true;
         
         for(let i = 1; i <= 8; i++) {
             if(n) {
@@ -356,6 +359,7 @@ class Rook extends Piece {
                     }
                     else if(board.getPieceFromPos(pn).color != this.color) {
                         this.moves.push(pn);
+                        n = false;
                     }
                     //Ally piece blocking
                     else {
@@ -371,6 +375,7 @@ class Rook extends Piece {
                     }
                     else if(board.getPieceFromPos(pe).color != this.color) {
                         this.moves.push(pe);
+                        e = false;
                     }
                     //Ally piece blocking
                     else {
@@ -386,6 +391,7 @@ class Rook extends Piece {
                     }
                     else if(board.getPieceFromPos(ps).color != this.color) {
                         this.moves.push(ps);
+                        s = false;
                     }
                     //Ally piece blocking
                     else {
@@ -401,6 +407,7 @@ class Rook extends Piece {
                     }
                     else if(board.getPieceFromPos(pw).color != this.color) {
                         this.moves.push(pw);
+                        w = false;
                     }
                     //Ally piece blocking
                     else {
@@ -408,65 +415,7 @@ class Rook extends Piece {
                     }
                 }
             }
-            if(ne) {
-                if(board.legalPosition(this.file + i, this.rank + i)) {
-                    let pne = board.getPos(this.file + i, this.rank + i);
-                    if(board.getPieceFromPos(pne) == null) {
-                        this.moves.push(pne);
-                    }
-                    else if(board.getPieceFromPos(pne).color != this.color) {
-                        this.moves.push(pne);
-                    }
-                    //Ally piece blocking
-                    else {
-                        ne = false;
-                    }
-                }
-            }
-            if(nw) {
-                if(board.legalPosition(this.file - i, this.rank + i)) {
-                    let pnw = board.getPos(this.file - i, this.rank + i);
-                    if(board.getPieceFromPos(pnw) == null) {
-                    }
-                    else if(board.getPieceFromPos(pnw).color != this.color) {
-                    }
-                    //Ally piece blocking
-                    else {
-                        nw = false;
-                    }
-                }
-            }
-            if(se) {
-                if(board.legalPosition(this.file + i, this.rank - i)) {
-                    let pse = board.getPos(this.file + i, this.rank - i);
-                    if(board.getPieceFromPos(pse) == null) {
-                        this.moves.push(pse);
-                        console.log((this.file + i) + "," + (this.rank-i))
-                    }
-                    else if(board.getPieceFromPos(pse).color != this.color) {
-                        this.moves.push(pse);
-                    }
-                    //Ally piece blocking
-                    else {
-                        se = false;
-                    }
-                }
-            }
-            if(sw) {
-                if(board.legalPosition(this.file - i, this.rank - i)) {
-                    let psw = board.getPos(this.file - i, this.rank - i);
-                    if(board.getPieceFromPos(psw) == null) {
-                        this.moves.push(psw);
-                    }
-                    else if(board.getPieceFromPos(psw).color != this.color) {
-                        this.moves.push(psw);
-                    }
-                    //Ally piece blocking
-                    else {
-                        sw = false;
-                    }
-                }
-            }
+            
         }
     }
 
@@ -499,6 +448,7 @@ class Queen extends Piece {
                     }
                     else if(board.getPieceFromPos(pn).color != this.color) {
                         this.moves.push(pn);
+                        n = false;
                     }
                     //Ally piece blocking
                     else {
@@ -514,6 +464,7 @@ class Queen extends Piece {
                     }
                     else if(board.getPieceFromPos(pe).color != this.color) {
                         this.moves.push(pe);
+                        e = false;
                     }
                     //Ally piece blocking
                     else {
@@ -529,6 +480,7 @@ class Queen extends Piece {
                     }
                     else if(board.getPieceFromPos(ps).color != this.color) {
                         this.moves.push(ps);
+                        s = false;
                     }
                     //Ally piece blocking
                     else {
@@ -544,10 +496,76 @@ class Queen extends Piece {
                     }
                     else if(board.getPieceFromPos(pw).color != this.color) {
                         this.moves.push(pw);
+                        w = false;
                     }
                     //Ally piece blocking
                     else {
                         w = false;
+                    }
+                }
+            }
+            if(ne) {
+                if(board.legalPosition(this.file + i, this.rank + i)) {
+                    let pne = board.getPos(this.file + i, this.rank + i);
+                    if(board.getPieceFromPos(pne) == null) {
+                        this.moves.push(pne);
+                    }
+                    else if(board.getPieceFromPos(pne).color != this.color) {
+                        this.moves.push(pne);
+                        ne = false;
+                    }
+                    //Ally piece blocking
+                    else {
+                        ne = false;
+                    }
+                }
+            }
+            if(nw) {
+                if(board.legalPosition(this.file - i, this.rank + i)) {
+                    let pnw = board.getPos(this.file - i, this.rank + i);
+                    if(board.getPieceFromPos(pnw) == null) {
+                        this.moves.push(pnw);
+                    }
+                    else if(board.getPieceFromPos(pnw).color != this.color) {
+                        this.moves.push(pnw);
+                        nw = false;
+                    }
+                    //Ally piece blocking
+                    else {
+                        nw = false;
+                    }
+                }
+            }
+            if(se) {
+                if(board.legalPosition(this.file + i, this.rank - i)) {
+                    let pse = board.getPos(this.file + i, this.rank - i);
+                    if(board.getPieceFromPos(pse) == null) {
+                        this.moves.push(pse);
+                        console.log((this.file + i) + "," + (this.rank-i))
+                    }
+                    else if(board.getPieceFromPos(pse).color != this.color) {
+                        this.moves.push(pse);
+                        se = false;
+                    }
+                    //Ally piece blocking
+                    else {
+                        se = false;
+                    }
+                }
+            }
+            if(sw) {
+                if(board.legalPosition(this.file - i, this.rank - i)) {
+                    let psw = board.getPos(this.file - i, this.rank - i);
+                    if(board.getPieceFromPos(psw) == null) {
+                        this.moves.push(psw);
+                    }
+                    else if(board.getPieceFromPos(psw).color != this.color) {
+                        this.moves.push(psw);
+                        sw = false;
+                    }
+                    //Ally piece blocking
+                    else {
+                        sw = false;
                     }
                 }
             }
