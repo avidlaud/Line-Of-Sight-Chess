@@ -172,7 +172,6 @@ class Board {
         return this.board[pos];
     }
 
-
     /**
      * Calculate the new position of a piece given a move from the perspective of a player
      * @param {Number} startFile    starting file
@@ -201,6 +200,19 @@ class Board {
      * @param {Boolean} color 
      */
     getMoves(color) {
+        let pieces = this.board.filter(p => p != null).filter(p => p.color == color);
+        let legalMoves = [];
+        pieces.forEach(p => {
+            p.getMoves(this);
+            p.moves.forEach(m => {
+                //"Play" move and see if it would put own king in check
+                let oldPos = this.getPos(p.file, p.rank);
+                let targetPiece = this.board[m];
+                this.board[m] = null;
+                [this.board[m], targetPiece] = [null, this.board[m]];
+                console.log(targetPiece);
+            })
+        })
         
     }
 
@@ -238,6 +250,27 @@ class Board {
         });
     }
 
+    copyBoard() {
+        let copy = new Board();
+        this.board.forEach(p => {
+            if(p == null) {
+                copy.board.push(null);
+            }
+            else {
+                if(p.constructor.name == "King") {
+                    if(p.color) {
+                        copy.whiteKing = p;
+                    }
+                    else {
+                        copy.blackKing = p;
+                    }
+                }
+                copy.board.push(p.copyPiece());
+            }
+        });
+        return copy;
+    }
+
     get() {
         return this.board;
     }
@@ -261,6 +294,13 @@ class Piece {
      * Abstract
      */
     getMoves(board) {
+
+    }
+
+    /**
+     * Abstract
+     */
+    copyPiece() {
 
     }
 
@@ -298,6 +338,10 @@ class Pawn extends Piece{
         }
     }
 
+    copyPiece() {
+        return new Pawn(this.file, this.rank, this.color);
+    }
+
     toString() {return "Pawn";}
 }
 
@@ -322,6 +366,10 @@ class Knight extends Piece {
                 }
             }
         } );
+    }
+
+    copyPiece() {
+        return new Knight(this.file, this.rank, this.color);
     }
 
     toString() { return "Knight"}
@@ -409,6 +457,10 @@ class Bishop extends Piece {
         }
     }
 
+    copyPiece() {
+        return new Bishop(this.file, this.rank, this.color);
+    }
+
     toString() {return "Bishop"}
 }
 
@@ -492,6 +544,10 @@ class Rook extends Piece {
             }
             
         }
+    }
+
+    copyPiece() {
+        return new Rook(this.file, this.rank, this.color);
     }
 
     toString() {return "Rook"}
@@ -646,6 +702,10 @@ class Queen extends Piece {
         }
     }
 
+    copyPiece() {
+        return new Queen(this.file, this.rank, this.color);
+    }
+
     toString() {return "Queen"}
 }
 
@@ -672,7 +732,19 @@ class King extends Piece {
         } );
     }
 
+    copyPiece() {
+        return new King(this.file, this.rank, this.color);
+    }
+
     toString() {return "King"}
+}
+
+class Move {
+    constructor(piece, startPos, endPos) {
+        this.piece = piece;
+        this.startPos = startPos;
+        this.endPos = endPos;
+    }
 }
 
 game = new LOSChess();
