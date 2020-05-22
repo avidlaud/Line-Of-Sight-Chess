@@ -320,7 +320,6 @@ class Bishop extends Piece {
                     let pse = board.getPos(this.file + i, this.rank - i);
                     if(board.getPieceFromPos(pse) == null) {
                         this.moves.push(pse);
-                        console.log((this.file + i) + "," + (this.rank-i))
                     }
                     else if(board.getPieceFromPos(pse).color != this.color) {
                         this.moves.push(pse);
@@ -558,7 +557,6 @@ class Queen extends Piece {
                     let pse = board.getPos(this.file + i, this.rank - i);
                     if(board.getPieceFromPos(pse) == null) {
                         this.moves.push(pse);
-                        console.log((this.file + i) + "," + (this.rank-i))
                     }
                     else if(board.getPieceFromPos(pse).color != this.color) {
                         this.moves.push(pse);
@@ -596,6 +594,23 @@ class King extends Piece {
 
     constructor(file, rank, color) {
         super(file, rank, color);
+    }
+
+    kingMoves = [[1,0], [1,1], [0,1], [-1,1], [-1,0], [-1,-1,], [0,-1], [1,-1]];
+
+    getMoves(board) {
+        this.board = [];
+        this.kingMoves.forEach(e => {
+            if(board.legalPosition(this.file + e[0], this.rank + e[1])) {
+                let targetPiece = board.getPos(this.file + e[0], this.rank + e[1]);
+                if(board.getPieceFromPos(targetPiece) == null) {
+                    this.moves.push(targetPiece);
+                }
+                else if(board.getPieceFromPos(targetPiece).color != this.color) {
+                    this.moves.push(targetPiece);
+                }
+            }
+        } );
     }
 
     toString() {return "King"}
