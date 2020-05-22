@@ -37,7 +37,33 @@ class LOSChess {
         this.gameboard = new Board();
         this.gameboard.setNewBoard();
         this.gameboard.drawBoard();
+        this.selected = null;
+        this.playerTurn = true;
     }
+
+    selectPiece(event) {
+        event.dataTransfer.setData("pos", event.target.parentNode.id.slice(7));
+        console.log(event.target.parentNode.id.slice(7));
+    }
+
+    allowDrop(event) {
+        event.preventDefault();
+    }
+
+    drop(event) {
+        event.preventDefault
+        //Dropped on a square
+        if(event.target.localName == "div") {
+            let targetSquare = event.target.id.slice(6);
+            console.log(targetSquare);
+        }
+        //Dropped on top of a piece
+        else if(event.target.localName == "img") {
+            let targetSquare = event.target.parentNode.id.slice(7);
+            console.log(targetSquare);
+        }
+    }
+
 }
 
 /**
@@ -50,6 +76,10 @@ class Board {
         this.board = [];
     }
 
+    whiteKing;
+
+    blackKing;
+
     setNewBoard() {
         this.board = [];
         /*
@@ -61,7 +91,8 @@ class Board {
         this.board.push(new Knight(Files.B, 8, Players.Black));
         this.board.push(new Bishop(Files.C, 8, Players.Black));
         this.board.push(new Queen(Files.D, 8, Players.Black));
-        this.board.push(new King(Files.E, 8, Players.Black));
+        this.blackKing = new King(Files.E, 8, Players.Black);
+        this.board.push(this.blackKing);
         this.board.push(new Bishop(Files.F, 8, Players.Black));
         this.board.push(new Knight(Files.G, 8, Players.Black));
         this.board.push(new Rook(Files.H, 8, Players.Black));
@@ -78,10 +109,12 @@ class Board {
         this.board.push(new Knight(Files.B, 1, Players.White));
         this.board.push(new Bishop(Files.C, 1, Players.White));
         this.board.push(new Queen(Files.D, 1, Players.White));
-        this.board.push(new King(Files.E, 1, Players.White));
+        this.whiteKing = new King(Files.E, 1, Players.White)
+        this.board.push(this.whiteKing);
         this.board.push(new Bishop(Files.F, 1, Players.White));
         this.board.push(new Knight(Files.G, 1, Players.White));
         this.board.push(new Rook(Files.H, 1, Players.White));
+
     }
 
     /**
@@ -163,13 +196,39 @@ class Board {
         return ((file >= 1) && (file <= 8) && (rank >= 1) && (rank <= 8));
     }
 
+    /**
+     * Find all legal moves 
+     * @param {Boolean} color 
+     */
+    getMoves(color) {
+        
+    }
+
+    boardWithCheck(color) {
+        //Determine position of king
+        let myKing = color ? this.whiteKing:this.blackKing;
+        let kingPos = this.getPos(myKing.file, myKing.rank);
+        //Find if any piece attacks it
+        let enemyPieces = this.board.filter(p => p != null).filter(p => p.color != color);
+        let underAttack = false;
+        enemyPieces.forEach(p => {
+            p.getMoves(this);
+            p.moves.forEach(m => {
+                if(m == kingPos) {
+                    underAttack = true;
+                    return;
+                }
+            });
+        });
+        return underAttack;
+    }
 
     drawBoard() {
         this.board.forEach((e, i) => {
             let image = (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>";
             let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
             //"images/white-pawn.png"
-            board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}"><div id="square_${i}" class="square-content">${image}</div></div>`;
+            board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}" ondragover="game.allowDrop(event)" ondrop="game.drop(event)"><div id="square_${i}" class="square-content" draggable="true" ondragstart="game.selectPiece(event)">${image}</div></div>`;
             if(e != null) {
                 e.getMoves(this);
                 console.log(e.constructor.name);
