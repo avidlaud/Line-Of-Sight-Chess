@@ -108,13 +108,11 @@ class Board {
 
     blackKing;
 
+    /**
+     * Set up initial board state
+     */
     setNewBoard() {
         this.board = [];
-        /*
-        for(let i = 0; i < 64; i++) {
-            this.board.push(new Pawn(i, i, true));
-        }
-        */
         this.board.push(new Rook(Files.A, 8, Players.Black));
         this.board.push(new Knight(Files.B, 8, Players.Black));
         this.board.push(new Bishop(Files.C, 8, Players.Black));
@@ -142,7 +140,6 @@ class Board {
         this.board.push(new Bishop(Files.F, 1, Players.White));
         this.board.push(new Knight(Files.G, 1, Players.White));
         this.board.push(new Rook(Files.H, 1, Players.White));
-
     }
 
     /**
@@ -235,30 +232,37 @@ class Board {
         return oldPiece;
     }
 
+    /**
+     * Perform a move on the board
+     * @param {Piece} piece the piece to move
+     * @param {Number} target board array position to move to
+     * @param {Boolean} color player who owns piece
+     */
     move(piece, target, color) {
         //Castling
         if(piece.constructor.name == "King") {
             if(!piece.hasMoved && (Math.abs(this.getFile(target)-piece.file) > 1)) {
                 let castleRank = color ? 1:8;
                 //King side castle
-                if(this.board.getFile(target) == 7) {
+                if(this.getFile(target) == 7) {
                     //Move rook
-                    this.replacePiece(this.getPos(6, castleRank), this.board.getPiece(this.getPos(8, castleRank)));
+                    this.replacePiece(this.getPos(6, castleRank), this.getPiece(8, castleRank));
+                    console.log(this.board);
                     this.getPiece(6, castleRank).file = 6;
                     this.replacePiece(this.getPos(8, castleRank), null);
                     //Move king
-                    this.replacePiece(this.getPos(7, castleRank), this.board.getPiece(this.getPos(5, castleRank)));
+                    this.replacePiece(this.getPos(7, castleRank), this.getPiece(5, castleRank));
                     this.getPiece(7, castleRank).file = 7;
                     this.replacePiece(this.getPos(5, castleRank), null);
                 }
                 //Queen side castle
                 else {
                     //Move rook
-                    this.replacePiece(this.getPos(4, castleRank), this.board.getPiece(this.getPos(1, castleRank)));
+                    this.replacePiece(this.getPos(4, castleRank), this.getPiece(1, castleRank));
                     this.getPiece(4, castleRank).file = 4;
                     this.replacePiece(this.getPos(1, castleRank), null);
                     //Move king
-                    this.replacePiece(this.getPos(3, castleRank), this.board.getPiece(this.getPos(5, castleRank)));
+                    this.replacePiece(this.getPos(3, castleRank), this.getPiece(5, castleRank));
                     this.getPiece(3, castleRank).file = 3;
                     this.replacePiece(this.getPos(5, castleRank), null);
                 }
@@ -279,6 +283,7 @@ class Board {
     /**
      * Find all legal moves 
      * @param {Boolean} color 
+     * @returns array of legal moves
      */
     getMoves(color) {
         let pieces = this.board.filter(p => p != null).filter(p => p.color == color);
@@ -299,6 +304,43 @@ class Board {
         return legalMoves;
     }
 
+    /**
+     * Determines if a position is under attack by the enemy
+     * @param {Number} pos position to check
+     * @param {Boolean} color player who may be "attacked"
+     */
+    attacked(pos, color) {
+        let enemyMoves = [];
+        let enemyPieces = this.board.filter(p => p != null).filter(p => p.color != color);
+        let isAttacked = false;
+        enemyPieces.forEach(p => {
+            //Must be handled differently to eliminate infinite recursion
+            if(p.constructor.name == "King") {
+                if(p.getAttacks(this).filter(m => m == pos).length > 0) {
+                    isAttacked = true;
+                }
+            }
+            else if(p.constructor.name == "Pawn") {
+                p.getMoves(this);
+                if(p.moves.filter(m => ((m == pos) && (this.getFile(m) != p.file))).length > 0) {
+                    isAttacked = true;
+                }
+            }
+            else {
+                p.getMoves(this);
+                if(p.moves.filter(m => m == pos).length > 0) {
+                    isAttacked = true;
+                }
+            }
+        })
+        return isAttacked;
+    }
+
+    /**
+     * Determines if there is a check on the board
+     * @param {Boolean} color 
+     * @returns true if check, false otherwise
+     */
     boardWithCheck(color) {
         //Determine position of king
         let myKing = color ? this.whiteKing:this.blackKing;
@@ -318,6 +360,9 @@ class Board {
         return underAttack;
     }
 
+    /**
+     * Edit the html to display the current board state
+     */
     drawBoard() {
         board_container.innerHTML = "";
         this.board.forEach((e, i) => {
@@ -803,7 +848,7 @@ class King extends Piece {
     kingMoves = [[1,0], [1,1], [0,1], [-1,1], [-1,0], [-1,-1,], [0,-1], [1,-1]];
 
     getMoves(board) {
-        this.board = [];
+        this.moves = [];
         this.kingMoves.forEach(e => {
             if(board.legalPosition(this.file + e[0], this.rank + e[1])) {
                 let targetPiece = board.getPos(this.file + e[0], this.rank + e[1]);
@@ -815,6 +860,48 @@ class King extends Piece {
                 }
             }
         } );
+        //Castling
+        if(!this.hasMoved) {
+            let castleRank = this.color ? 1:8;
+            //King side castle
+            let kingRook = board.getPieceFromPos(board.getPos(8, castleRank));
+            if(kingRook != null && kingRook.constructor.name == "Rook" && !kingRook.hasMoved) {
+                //Make sure squares aren't under attack
+                if(!(board.attacked(board.getPos(this.file, this.rank), this.color) || board.attacked(board.getPos(6, castleRank), this.color) || board.attacked(board.getPos(7, castleRank), this.color))
+                    && board.getPiece(6, castleRank) == null && board.getPiece(7, castleRank) == null) {
+                    this.moves.push(board.getPos(7, castleRank));
+                }
+            }
+            //Queen side castle
+            let queenRook = board.getPieceFromPos(board.getPos(1, castleRank));
+            if(queenRook != null && queenRook.constructor.name == "Rook" && !queenRook.hasMoved) {
+                //Make sure squares aren't under attack
+                if(!(board.attacked(board.getPos(this.file, this.rank), this.color) ||  board.attacked(board.getPos(3, castleRank), this.color) || board.attacked(board.getPos(4, castleRank), this.color))
+                    && board.getPiece(2, castleRank) == null && board.getPiece(3, castleRank) == null && board.getPiece(4, castleRank) == null) {
+                    this.moves.push(board.getPos(3, castleRank));
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns only "attacks" by the king to prevent infinite recusion when calculating moves
+     * @param {Array} board 
+     */
+    getAttacks(board) {
+        let attacks = [];
+        this.kingMoves.forEach(e => {
+            if(board.legalPosition(this.file + e[0], this.rank + e[1])) {
+                let targetPiece = board.getPos(this.file + e[0], this.rank + e[1]);
+                if(board.getPieceFromPos(targetPiece) == null) {
+                    attacks.push(targetPiece);
+                }
+                else if(board.getPieceFromPos(targetPiece).color != this.color) {
+                    attacks.push(targetPiece);
+                }
+            }
+        } );
+        return attacks;
     }
 
     copyPiece() {
