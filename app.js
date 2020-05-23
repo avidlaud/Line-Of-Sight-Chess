@@ -52,6 +52,7 @@ class LOSChess {
         console.log(tb.boardWithCheck());
         */
         //console.log(this.gameboard.getMoves(true));
+        this.selected = this.gameboard.getPieceFromPos(event.target.parentNode.id.slice(7));
     }
 
     allowDrop(event) {
@@ -64,11 +65,30 @@ class LOSChess {
         if(event.target.localName == "div") {
             let targetSquare = event.target.id.slice(6);
             console.log(targetSquare);
+            this.gameboard.getMoves(this.playerTurn).forEach(m => {
+                //Find if legal move
+                if(m.piece == this.selected && m.startPos == this.gameboard.getPos(this.selected.file, this.selected.rank) && m.endPos == targetSquare) {
+                    this.gameboard.move(this.selected, targetSquare, this.playerTurn);
+
+                    this.playerTurn = !this.playerTurn;
+                    this.selected = null;
+                }
+            });
+            this.gameboard.drawBoard();
         }
         //Dropped on top of a piece
         else if(event.target.localName == "img") {
             let targetSquare = event.target.parentNode.id.slice(7);
             console.log(targetSquare);
+            this.gameboard.getMoves(this.playerTurn).forEach(m => {
+                //Find if legal move
+                if(m.piece == this.selected && m.startPos == this.gameboard.getPos(this.selected.file, this.selected.rank) && m.endPos == targetSquare) {
+                    this.gameboard.move(this.selected, targetSquare, this.playerTurn);
+                    this.playerTurn = !this.playerTurn;
+                    this.selected = null;
+                }
+            });
+            this.gameboard.drawBoard();
         }
     }
 
@@ -218,7 +238,7 @@ class Board {
     move(piece, target, color) {
         //Castling
         if(piece.constructor.name == "King") {
-            if(!piece.hasMoved && (Math.abs(this.board.getFile(target)-piece.file) > 1)) {
+            if(!piece.hasMoved && (Math.abs(this.getFile(target)-piece.file) > 1)) {
                 let castleRank = color ? 1:8;
                 //King side castle
                 if(this.board.getFile(target) == 7) {
@@ -251,6 +271,7 @@ class Board {
             this.replacePiece(target, piece);
             piece.file = this.getFile(target);
             piece.rank = this.getRank(target);
+            piece.hasMoved = true;
             this.replacePiece(sourcePos, null);
         }
     }
@@ -270,7 +291,7 @@ class Board {
                 let testBoard = this.copyBoard();
                 let testPiece = testBoard.getPiece(p.file, p.rank);
                 testBoard.move(testPiece, m, color);
-                if(!testBoard.boardWithCheck()) {
+                if(!testBoard.boardWithCheck(color)) {
                     legalMoves.push(new Move(p, oldPos, m));
                 }
             });
@@ -298,6 +319,7 @@ class Board {
     }
 
     drawBoard() {
+        board_container.innerHTML = "";
         this.board.forEach((e, i) => {
             let image = (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>";
             let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
@@ -305,8 +327,6 @@ class Board {
             board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}" ondragover="game.allowDrop(event)" ondrop="game.drop(event)"><div id="square_${i}" class="square-content" draggable="true" ondragstart="game.selectPiece(event)">${image}</div></div>`;
             if(e != null) {
                 e.getMoves(this);
-                console.log(e.constructor.name);
-                console.log(e.moves);
             }
             //console.log(this.getRank(i));
         });
