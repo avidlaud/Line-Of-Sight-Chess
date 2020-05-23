@@ -44,6 +44,14 @@ class LOSChess {
     selectPiece(event) {
         event.dataTransfer.setData("pos", event.target.parentNode.id.slice(7));
         console.log(event.target.parentNode.id.slice(7));
+        /*
+        console.log(this.gameboard.getMoves(true));
+        let tb = this.gameboard.copyBoard();
+        tb.move(tb.getPieceFromPos(8), 16, false);
+        console.log(tb);
+        console.log(tb.boardWithCheck());
+        */
+        //console.log(this.gameboard.getMoves(true));
     }
 
     allowDrop(event) {
@@ -196,6 +204,58 @@ class Board {
     }
 
     /**
+     * Replace the piece at a position with a new specified piece
+     * @param {Number} pos 
+     * @param {Piece} newPiece 
+     * @returns the piece previously in the position
+     */
+    replacePiece(pos, newPiece) {
+        let oldPiece = this.board[pos];
+        this.board.splice(pos, 1, newPiece);
+        return oldPiece;
+    }
+
+    move(piece, target, color) {
+        //Castling
+        if(piece.constructor.name == "King") {
+            if(!piece.hasMoved && (Math.abs(this.board.getFile(target)-piece.file) > 1)) {
+                let castleRank = color ? 1:8;
+                //King side castle
+                if(this.board.getFile(target) == 7) {
+                    //Move rook
+                    this.replacePiece(this.getPos(6, castleRank), this.board.getPiece(this.getPos(8, castleRank)));
+                    this.getPiece(6, castleRank).file = 6;
+                    this.replacePiece(this.getPos(8, castleRank), null);
+                    //Move king
+                    this.replacePiece(this.getPos(7, castleRank), this.board.getPiece(this.getPos(5, castleRank)));
+                    this.getPiece(7, castleRank).file = 7;
+                    this.replacePiece(this.getPos(5, castleRank), null);
+                }
+                //Queen side castle
+                else {
+                    //Move rook
+                    this.replacePiece(this.getPos(4, castleRank), this.board.getPiece(this.getPos(1, castleRank)));
+                    this.getPiece(4, castleRank).file = 4;
+                    this.replacePiece(this.getPos(1, castleRank), null);
+                    //Move king
+                    this.replacePiece(this.getPos(3, castleRank), this.board.getPiece(this.getPos(5, castleRank)));
+                    this.getPiece(3, castleRank).file = 3;
+                    this.replacePiece(this.getPos(5, castleRank), null);
+                }
+            }
+        }
+        //TODO En Passant
+        //TODO Pawn promotion
+        else {
+            let sourcePos = this.getPos(piece.file, piece.rank);
+            this.replacePiece(target, piece);
+            piece.file = this.getFile(target);
+            piece.rank = this.getRank(target);
+            this.replacePiece(sourcePos, null);
+        }
+    }
+
+    /**
      * Find all legal moves 
      * @param {Boolean} color 
      */
@@ -207,13 +267,15 @@ class Board {
             p.moves.forEach(m => {
                 //"Play" move and see if it would put own king in check
                 let oldPos = this.getPos(p.file, p.rank);
-                let targetPiece = this.board[m];
-                this.board[m] = null;
-                [this.board[m], targetPiece] = [null, this.board[m]];
-                console.log(targetPiece);
-            })
-        })
-        
+                let testBoard = this.copyBoard();
+                let testPiece = testBoard.getPiece(p.file, p.rank);
+                testBoard.move(testPiece, m, color);
+                if(!testBoard.boardWithCheck()) {
+                    legalMoves.push(new Move(p, oldPos, m));
+                }
+            });
+        });
+        return legalMoves;
     }
 
     boardWithCheck(color) {
@@ -250,6 +312,9 @@ class Board {
         });
     }
 
+    /**
+     * Returns a copy of the current board state
+     */
     copyBoard() {
         let copy = new Board();
         this.board.forEach(p => {
