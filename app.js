@@ -37,7 +37,7 @@ class LOSChess {
     constructor() {
         this.gameboard = new Board();
         this.gameboard.setNewBoard();
-        this.gameboard.drawBoard();
+        this.gameboard.drawBoard(true);
         this.selected = null;
         this.playerTurn = true;
     }
@@ -93,7 +93,7 @@ class LOSChess {
                     this.selected = null;
                 }
             });
-            this.gameboard.drawBoard();
+            this.gameboard.drawBoard(this.playerTurn);
         }
         console.log(this.gameboard.enPassantSquare);
     }
@@ -213,7 +213,7 @@ class Board {
      * @param {Number} startRank    starting rank
      * @param {Number} fileMove     number of files to move: + is right, - is left
      * @param {Number} rankMove     number of ranks to move: + is up, - is down
-     * @param {Number} color        the player
+     * @param {Boolean} color        the player
      * @returns the new position
      */
     calcPos(startFile, startRank, fileMove, rankMove, color) {
@@ -394,10 +394,36 @@ class Board {
     /**
      * Edit the html to display the current board state
      */
-    drawBoard() {
+    drawBoard(color) {
         board_container.innerHTML = "";
+        let visible = new Array(64).fill(false);
+        //Set own pieces to be visible
+        this.board.filter(p => p != null).filter(p => p.color == color).forEach(p => {
+            visible[this.getPos(p.file, p.rank)] = true;
+        });
+        //Set "attacks" to be visible
+        this.getMoves(color).forEach(move => {
+            visible[move.endPos] = true;
+        });
+        //Add visibility for pawns
+        this.board.filter(p => p != null).filter(p => p.color == color && p.constructor.name == "Pawn").forEach(p => {
+            visible[this.calcPos(p.file, p.rank, 1, 1, color)] = true;
+            visible[this.calcPos(p.file, p.rank, -1, 1, color)] = true;
+        });
+        //Add visibility for pieces that are putting in check
+        if(this.boardWithCheck(color)) {
+            let kingPos = color ? this.getPos(this.whiteKing.file, this.whiteKing.rank):this.getPos(this.blackKing.file, this.blackKing.rank);
+            this.board.filter(p => p != null).filter(p => p.color != color).forEach(p => {
+                p.getMoves(this);
+                p.moves.forEach(m => {
+                    if(m == kingPos) {
+                        visible[this.getPos(p.file, p.rank)] = true;
+                    }
+                });
+            });
+        }
         this.board.forEach((e, i) => {
-            let image = (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>";
+            let image = (visible[i]) ? (e === null) ? "":"<img src=images/" + (e.color ? "white":"black") + "-" + e.constructor.name.toLowerCase() + ".png>":"<img src=images/cloud.png>";
             let squareColor = ((i+Math.floor(i/8))%2===1) ? "dark-square":"light-square";
             //"images/white-pawn.png"
             board_container.innerHTML += `<div id="block_${i}" class="square ${squareColor}" ondragover="game.allowDrop(event)" ondrop="game.drop(event)"><div id="square_${i}" class="square-content" draggable="true" ondragstart="game.selectPiece(event)">${image}</div></div>`;
@@ -418,15 +444,15 @@ class Board {
                 copy.board.push(null);
             }
             else {
+                copy.board.push(p.copyPiece());
                 if(p.constructor.name == "King") {
                     if(p.color) {
-                        copy.whiteKing = p;
+                        copy.whiteKing = copy.getPiece(p.file, p.rank);
                     }
                     else {
-                        copy.blackKing = p;
+                        copy.blackKing = copy.getPiece(p.file, p.rank);
                     }
                 }
-                copy.board.push(p.copyPiece());
             }
         });
         return copy;
@@ -519,7 +545,7 @@ class Knight extends Piece {
     knightMoves = [[1,2], [1,-2], [2,1], [2,-1], [-1,2], [-1,-2], [-2,1], [-2,-1]];
 
     getMoves(board) {
-        this.board = [];
+        this.moves = [];
         this.knightMoves.forEach(e => {
             if(board.legalPosition(this.file + e[0], this.rank + e[1])) {
                 let targetPiece = board.getPos(this.file + e[0], this.rank + e[1]);

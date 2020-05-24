@@ -21,9 +21,13 @@ h2 {
     margin-bottom: 0.5em;
 }
 
+img {
+    width: 100%;
+}
+
 .board {
     margin: auto;
-    width: 80vw;
+    width: 60vh;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
