@@ -85,7 +85,7 @@ class LOSChess {
                         game_information.innerHTML += `<h1>Player in Check</h1>`;
                         //Check if checkmate - no valid moves
                         if(this.gameboard.getMoves(!this.playerTurn).length == 0) {
-                            game_information.innerHTML += `<h1>Checkmate</h1>`;
+                            game_information.innerHTML = `<h1>Checkmate</h1>`;
                         }
                     }
                     
@@ -408,6 +408,7 @@ class Board {
         //Add visibility for pawns
         this.board.filter(p => p != null).filter(p => p.color == color && p.constructor.name == "Pawn").forEach(p => {
             visible[this.calcPos(p.file, p.rank, 1, 1, color)] = true;
+            visible[this.calcPos(p.file, p.rank, 0, 1, color)] = true;
             visible[this.calcPos(p.file, p.rank, -1, 1, color)] = true;
         });
         //Add visibility for pieces that are putting in check

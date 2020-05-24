@@ -6,13 +6,18 @@
 }
 
 .container {
-    background:#ddd;
     justify-content: center;
+}
+
+body {
+    background:#D7DEE4;
 }
 
 h1 {
     font-size: 5rem;
     margin-bottom: 0.5em;
+    justify-content: center;
+    text-align: center;
 }
 
 h2 {
@@ -27,7 +32,7 @@ img {
 
 .board {
     margin: auto;
-    width: 60vh;
+    width: 65vmin;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -58,4 +63,9 @@ img {
 
 .dark-square {
     background: #75513B;
+}
+
+.game-information {
+    justify-content: center;
+    text-align: center;
 }
