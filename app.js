@@ -1,4 +1,5 @@
 let board_container = document.querySelector(".board");
+let game_information = document.querySelector(".game-information");
 
 const Files = {
     A: 1, B: 2, C: 3, D: 4, E: 5, F: 6, G: 7, H: 8
@@ -61,36 +62,42 @@ class LOSChess {
 
     drop(event) {
         event.preventDefault
-        //Dropped on a square
-        if(event.target.localName == "div") {
-            let targetSquare = event.target.id.slice(6);
-            console.log(targetSquare);
-            this.gameboard.getMoves(this.playerTurn).forEach(m => {
-                //Find if legal move
-                if(m.piece == this.selected && m.startPos == this.gameboard.getPos(this.selected.file, this.selected.rank) && m.endPos == targetSquare) {
-                    this.gameboard.move(this.selected, targetSquare, this.playerTurn);
+        //Dropped on a square or piece
+        if(event.target.localName == "img" || event.target.localName == "div") {
+            game_information.innerHTML = "";
+            //Dropped on a square
+            let targetSquare;
+            if(event.target.localName == "div") {
+                targetSquare = event.target.id.slice(6);
 
-                    this.playerTurn = !this.playerTurn;
-                    this.selected = null;
-                }
-            });
-            this.gameboard.drawBoard();
-        }
-        //Dropped on top of a piece
-        else if(event.target.localName == "img") {
-            let targetSquare = event.target.parentNode.id.slice(7);
+            }
+            //Dropped on top of a piece
+            else { //(event.target.localName == "img") 
+                targetSquare = event.target.parentNode.id.slice(7);
+            }
             console.log(targetSquare);
             this.gameboard.getMoves(this.playerTurn).forEach(m => {
                 //Find if legal move
                 if(m.piece == this.selected && m.startPos == this.gameboard.getPos(this.selected.file, this.selected.rank) && m.endPos == targetSquare) {
                     this.gameboard.move(this.selected, targetSquare, this.playerTurn);
+                    //Check if this puts other player in check
+                    if(this.gameboard.boardWithCheck(!this.playerTurn)) {
+                        game_information.innerHTML += `<h1>Player in Check</h1>`;
+                        //Check if checkmate - no valid moves
+                        if(this.gameboard.getMoves(!this.playerTurn).length == 0) {
+                            game_information.innerHTML += `<h1>Checkmate</h1>`;
+                        }
+                    }
+                    
                     this.playerTurn = !this.playerTurn;
                     this.selected = null;
                 }
             });
             this.gameboard.drawBoard();
         }
+        console.log(this.gameboard.enPassantSquare);
     }
+
 
 }
 
@@ -107,6 +114,8 @@ class Board {
     whiteKing;
 
     blackKing;
+
+    enPassantSquare;
 
     /**
      * Set up initial board state
@@ -140,6 +149,7 @@ class Board {
         this.board.push(new Bishop(Files.F, 1, Players.White));
         this.board.push(new Knight(Files.G, 1, Players.White));
         this.board.push(new Rook(Files.H, 1, Players.White));
+        this.enPassantSquare = null;
     }
 
     /**
@@ -240,43 +250,64 @@ class Board {
      */
     move(piece, target, color) {
         //Castling
-        if(piece.constructor.name == "King") {
-            if(!piece.hasMoved && (Math.abs(this.getFile(target)-piece.file) > 1)) {
-                let castleRank = color ? 1:8;
-                //King side castle
-                if(this.getFile(target) == 7) {
-                    //Move rook
-                    this.replacePiece(this.getPos(6, castleRank), this.getPiece(8, castleRank));
-                    console.log(this.board);
-                    this.getPiece(6, castleRank).file = 6;
-                    this.replacePiece(this.getPos(8, castleRank), null);
-                    //Move king
-                    this.replacePiece(this.getPos(7, castleRank), this.getPiece(5, castleRank));
-                    this.getPiece(7, castleRank).file = 7;
-                    this.replacePiece(this.getPos(5, castleRank), null);
-                }
-                //Queen side castle
-                else {
-                    //Move rook
-                    this.replacePiece(this.getPos(4, castleRank), this.getPiece(1, castleRank));
-                    this.getPiece(4, castleRank).file = 4;
-                    this.replacePiece(this.getPos(1, castleRank), null);
-                    //Move king
-                    this.replacePiece(this.getPos(3, castleRank), this.getPiece(5, castleRank));
-                    this.getPiece(3, castleRank).file = 3;
-                    this.replacePiece(this.getPos(5, castleRank), null);
-                }
+        if(piece.constructor.name == "King" && !piece.hasMoved && (Math.abs(this.getFile(target)-piece.file) > 1)) {
+            let castleRank = color ? 1:8;
+            //King side castle
+            if(this.getFile(target) == 7) {
+                //Move rook
+                this.replacePiece(this.getPos(6, castleRank), this.getPiece(8, castleRank));
+                console.log(this.board);
+                this.getPiece(6, castleRank).file = 6;
+                this.replacePiece(this.getPos(8, castleRank), null);
+                //Move king
+                this.replacePiece(this.getPos(7, castleRank), this.getPiece(5, castleRank));
+                this.getPiece(7, castleRank).file = 7;
+                this.replacePiece(this.getPos(5, castleRank), null);
+                this.enPassantSquare = null;
+            }
+            //Queen side castle
+            else {
+                //Move rook
+                this.replacePiece(this.getPos(4, castleRank), this.getPiece(1, castleRank));
+                this.getPiece(4, castleRank).file = 4;
+                this.replacePiece(this.getPos(1, castleRank), null);
+                //Move king
+                this.replacePiece(this.getPos(3, castleRank), this.getPiece(5, castleRank));
+                this.getPiece(3, castleRank).file = 3;
+                this.replacePiece(this.getPos(5, castleRank), null);
+                this.enPassantSquare = null;
             }
         }
-        //TODO En Passant
-        //TODO Pawn promotion
+        //Pawn promotion
+        if(piece.constructor.name == "Pawn" && ((color && this.getRank(target) == 8) || (!color && this.getRank(target) == 1))) {
+            let sourcePos = this.getPos(piece.file, piece.rank);
+            this.replacePiece(target, new Queen(this.getFile(target), this.getRank(target), color));
+            this.replacePiece(sourcePos, null);
+            this.enPassantSquare = null;
+        }
         else {
+            //En Passant
+            if(piece.constructor.name == "Pawn" && target == this.enPassantSquare) {
+                if(color) { //White en passant - remove pawn one rank down
+                    this.replacePiece(this.getPos(this.getFile(target), this.getRank(target)-1), null);
+                }
+                else { //Black en passant - remove pawn one rank up
+                    this.replacePiece(this.getPos(this.getFile(target), this.getRank(target)+1), null);
+                }
+            }
             let sourcePos = this.getPos(piece.file, piece.rank);
             this.replacePiece(target, piece);
             piece.file = this.getFile(target);
             piece.rank = this.getRank(target);
             piece.hasMoved = true;
             this.replacePiece(sourcePos, null);
+            //If pawn moves up twice, set en passant
+            if(piece.constructor.name == "Pawn" && (Math.abs(this.getRank(sourcePos) - this.getRank(target)) > 1)) {
+                this.enPassantSquare = this.getPos(this.getFile(target), ((this.getRank(sourcePos)+this.getRank(target))/2));
+            }
+            else {
+                this.enPassantSquare = null;
+            }
         }
     }
 
@@ -465,6 +496,10 @@ class Pawn extends Piece{
         let rightAttack = board.calcPos(this.file, this.rank, 1, 1, this.color);
         if(board.getPieceFromPos(rightAttack) != null && board.getPieceFromPos(rightAttack).color != this.color) {
             this.moves.push(rightAttack);
+        }
+        //En Passant
+        if(board.calcPos(this.file, this.rank, 1, 1, this.color) == board.enPassantSquare || board.calcPos(this.file, this.rank, -1, 1, this.color) == board.enPassantSquare) {
+            this.moves.push(board.enPassantSquare);
         }
     }
 
